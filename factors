@@ -1,33 +1,67 @@
-#!/usr/bin/python3
-"""Module that factorize as many numbers as possible
- into a product of two smaller numbers."""
-from sys import argv
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
+typedef struct
+{
+	int first;
+	int second;
+} Pair;
 
-def factorize(value):
-    """"print a simple descomposition of an integer > 1"""
-    i = 2
+Pair factorize(int n)
+{
+	int i;
 
-    if value < 2:
-        return
-    print()
-    print(value, "<- value-bef")
-    while value % i:
-        i += 1
-    print("{:.0f}={:.0f}*{:.0f}".format(value, value / i, i))
-    print(value, "<- value-aft")
-    print()
+	for (i = 2; i <= sqrt(n); ++i)
+	{
+		if (n % i == 0)
+		{
+			Pair factors = {i, n / i};
+			return (factors);
+		}
+	}
 
-if len(argv) != 2:
-    exit()
+	Pair factors = {n, 1};
+	return (factors);
+}
 
-try:
-    with open(argv[1]) as file:
-        line = file.readline()
+int main(int argc, char* argv[])
+{
+	if (argc != 2)
+	{
+		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+		return (1);
+	}
 
-        while line != "":
-            value = int(line.split('\n')[0])
-            factorize(value)
-            line = file.readline()
-except:
-    pass
+	const char* file_path = argv[1];
+	FILE *file= fopen(file_path, "r");
+
+	if (!file)
+	{
+		fprintf(stderr, "Unable to open file: %s\n", file_path);
+		return (1);
+	}
+
+	char *line = NULL;
+	size_t len = 0;
+
+	while (getline(&line, len, file) != -1)
+	{
+		int number = strtol(line, NULL, 10);
+
+		if (number == 0)
+		{
+			fprintf(stderr, "Invalid data in the file: %s\n", file_path);
+			free(line);
+			fclose(file);
+			return(1);
+		}
+
+		Pair factors = factorize(number);
+		printf("%d=%d*%d\n", number, factors.first, factors.second);
+	}
+
+	free(line);
+	fclose(file);
+	return (0);
+}
